@@ -4328,7 +4328,7 @@ impl AgentPanel {
                             }
                         })
                         .item(
-                            ContextMenuEntry::new("Zed Agent")
+                            ContextMenuEntry::new("Mizen Agent")
                                 .when(
                                     !showing_terminal && is_agent_selected(Agent::NativeAgent),
                                     |this| this.action(Box::new(NewThread)),

@@ -1207,7 +1207,7 @@ async fn test_invalid_local_tasks_shows_toast_with_doc_link(cx: &mut gpui::TestA
                 link: Some(ToastLink { url, .. }),
             } => {
                 assert!(notification_id.starts_with("local-tasks-"));
-                assert!(message.contains("ZED_FOO"));
+                assert!(message.contains("MIZEN_FOO"));
                 assert_eq!(*url, "https://zed.dev/docs/tasks");
                 *saw_toast.borrow_mut() = true;
             }

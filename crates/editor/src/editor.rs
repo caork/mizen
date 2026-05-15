@@ -15169,7 +15169,7 @@ impl Render for MissingEditPredictionKeybindingTooltip {
                             window.dispatch_action(zed_actions::OpenKeymapFile.boxed_clone(), cx)
                         }))
                         .child(Button::new("see-docs", "See Docs").size(ButtonSize::Compact).on_click(|_ev, _window, cx| {
-                            cx.open_url("https://zed.dev/docs/completions#edit-predictions-missing-keybinding");
+                            cx.open_url("https://mizen.dev/docs/completions#edit-predictions-missing-keybinding");
                         })),
                 )
         })

@@ -322,30 +322,30 @@ impl RenderOnce for ZedAiConfiguration {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
         let (subscription_text, has_paid_plan) = match self.plan {
             Some(Plan::ZedPro) => (
-                "You have access to Zed's hosted models through your Pro subscription.",
+                "You have access to Mizen's hosted models through your Pro subscription.",
                 true,
             ),
             Some(Plan::ZedProTrial) => (
-                "You have access to Zed's hosted models through your Pro trial.",
+                "You have access to Mizen's hosted models through your Pro trial.",
                 false,
             ),
             Some(Plan::ZedStudent) => (
-                "You have access to Zed's hosted models through your Student subscription.",
+                "You have access to Mizen's hosted models through your Student subscription.",
                 true,
             ),
             Some(Plan::ZedBusiness) => (
                 if self.is_zed_model_provider_enabled {
-                    "You have access to Zed's hosted models through your organization."
+                    "You have access to Mizen's hosted models through your organization."
                 } else {
-                    "Zed's hosted models are disabled by your organization's configuration."
+                    "Mizen's hosted models are disabled by your organization's configuration."
                 },
                 true,
             ),
             Some(Plan::ZedFree) | None => (
                 if self.eligible_for_trial {
-                    "Subscribe for access to Zed's hosted models. Start with a 14 day free trial."
+                    "Subscribe for access to Mizen's hosted models. Start with a 14 day free trial."
                 } else {
-                    "Subscribe for access to Zed's hosted models."
+                    "Subscribe for access to Mizen's hosted models."
                 },
                 false,
             ),
@@ -736,7 +736,7 @@ impl Component for ZedAiConfiguration {
                         }),
                     ),
                     single_example(
-                        "Zed Pro Trial Plan",
+                        "Mizen Pro Trial Plan",
                         configuration(PreviewConfiguration {
                             plan: Some(Plan::ZedProTrial),
                             is_connected: true,
@@ -745,7 +745,7 @@ impl Component for ZedAiConfiguration {
                         }),
                     ),
                     single_example(
-                        "Zed Pro Plan",
+                        "Mizen Pro Plan",
                         configuration(PreviewConfiguration {
                             plan: Some(Plan::ZedPro),
                             is_connected: true,

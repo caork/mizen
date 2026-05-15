@@ -680,7 +680,7 @@ impl Render for ConfigurationView {
                             .size(IconSize::XSmall)
                             .color(Color::Muted),
                     )
-                    .child(Label::new("Zed also supports OpenAI-compatible models.")),
+                    .child(Label::new("Mizen also supports OpenAI-compatible models.")),
             )
             .child(
                 Button::new("docs", "Learn More")
@@ -690,7 +690,7 @@ impl Render for ConfigurationView {
                             .color(Color::Muted),
                     )
                     .on_click(move |_, _window, cx| {
-                        cx.open_url("https://zed.dev/docs/ai/llm-providers#openai-api-compatible")
+                        cx.open_url("https://mizen.dev/docs/ai/llm-providers#openai-api-compatible")
                     }),
             );
 

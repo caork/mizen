@@ -81,7 +81,7 @@ pub trait Watcher: Send + Sync {
 /// - `poll` — always use polling
 /// - `auto` (default) — auto-detect based on filesystem type
 pub fn requires_poll_watcher(path: &Path) -> bool {
-    match std::env::var("ZED_FILE_WATCHER_MODE")
+    match std::env::var("MIZEN_FILE_WATCHER_MODE")
         .as_deref()
         .unwrap_or("auto")
     {

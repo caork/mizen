@@ -1,0 +1,172 @@
+name: Mizen Release
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: '1'
+
+jobs:
+  build-macos-aarch64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Install dependencies
+        run: brew install cmake
+      - name: Build
+        env:
+          RELEASE_CHANNEL: stable
+          MIZEN_BUNDLE: true
+        run: cargo build --release -p mizen
+      - name: Package
+        run: |
+          mkdir -p artifacts
+          cp target/release/mizen artifacts/mizen-macos-aarch64
+          cd artifacts && tar czf mizen-macos-aarch64.tar.gz mizen-macos-aarch64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mizen-macos-aarch64
+          path: artifacts/mizen-macos-aarch64.tar.gz
+
+  build-macos-x86_64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin
+      - name: Install dependencies
+        run: brew install cmake
+      - name: Build
+        env:
+          RELEASE_CHANNEL: stable
+          MIZEN_BUNDLE: true
+        run: cargo build --release -p mizen
+      - name: Package
+        run: |
+          mkdir -p artifacts
+          cp target/release/mizen artifacts/mizen-macos-x86_64
+          cd artifacts && tar czf mizen-macos-x86_64.tar.gz mizen-macos-x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mizen-macos-x86_64
+          path: artifacts/mizen-macos-x86_64.tar.gz
+
+  build-linux-x86_64:
+    runs-on: ubuntu-22.04
+    env:
+      CC: clang
+      CXX: clang++
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install system dependencies
+        run: ./script/linux
+      - name: Download WASI SDK
+        run: ./script/download-wasi-sdk
+      - name: Build
+        env:
+          RELEASE_CHANNEL: stable
+        run: cargo build --release -p mizen
+      - name: Package
+        run: |
+          mkdir -p artifacts
+          cp target/release/mizen artifacts/mizen-linux-x86_64
+          cd artifacts && tar czf mizen-linux-x86_64.tar.gz mizen-linux-x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mizen-linux-x86_64
+          path: artifacts/mizen-linux-x86_64.tar.gz
+
+  build-linux-aarch64:
+    runs-on: ubuntu-22.04-arm
+    env:
+      CC: clang
+      CXX: clang++
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install system dependencies
+        run: ./script/linux
+      - name: Download WASI SDK
+        run: ./script/download-wasi-sdk
+      - name: Build
+        env:
+          RELEASE_CHANNEL: stable
+        run: cargo build --release -p mizen
+      - name: Package
+        run: |
+          mkdir -p artifacts
+          cp target/release/mizen artifacts/mizen-linux-aarch64
+          cd artifacts && tar czf mizen-linux-aarch64.tar.gz mizen-linux-aarch64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mizen-linux-aarch64
+          path: artifacts/mizen-linux-aarch64.tar.gz
+
+  build-windows-x86_64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        env:
+          RELEASE_CHANNEL: stable
+        run: cargo build --release -p mizen
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path artifacts -Force
+          Copy-Item target/release/mizen.exe artifacts/Mizen-x86_64.exe
+          Compress-Archive -Path artifacts/Mizen-x86_64.exe -DestinationPath artifacts/mizen-windows-x86_64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mizen-windows-x86_64
+          path: artifacts/mizen-windows-x86_64.zip
+
+  create-release:
+    needs:
+      - build-macos-aarch64
+      - build-macos-x86_64
+      - build-linux-x86_64
+      - build-linux-aarch64
+      - build-windows-x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      - name: Prepare release assets
+        run: |
+          mkdir -p release/
+          mv artifacts/mizen-macos-aarch64/mizen-macos-aarch64.tar.gz release/
+          mv artifacts/mizen-macos-x86_64/mizen-macos-x86_64.tar.gz release/
+          mv artifacts/mizen-linux-x86_64/mizen-linux-x86_64.tar.gz release/
+          mv artifacts/mizen-linux-aarch64/mizen-linux-aarch64.tar.gz release/
+          mv artifacts/mizen-windows-x86_64/mizen-windows-x86_64.zip release/
+          ls -la release/
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Mizen $TAG" \
+            --generate-notes \
+            release/*

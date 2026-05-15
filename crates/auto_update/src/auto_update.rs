@@ -246,8 +246,8 @@ pub fn init(client: Arc<Client>, cx: &mut App) {
             .map(|channel| channel.poll_for_updates())
             .unwrap_or(false);
 
-        if option_env!("ZED_UPDATE_EXPLANATION").is_none()
-            && env::var("ZED_UPDATE_EXPLANATION").is_err()
+        if option_env!("MIZEN_UPDATE_EXPLANATION").is_none()
+            && env::var("MIZEN_UPDATE_EXPLANATION").is_err()
             && poll_for_updates
         {
             let mut update_subscription = AutoUpdateSetting::get_global(cx)
@@ -272,13 +272,13 @@ pub fn init(client: Arc<Client>, cx: &mut App) {
 }
 
 pub fn check(_: &Check, window: &mut Window, cx: &mut App) {
-    if let Some(message) = option_env!("ZED_UPDATE_EXPLANATION")
+    if let Some(message) = option_env!("MIZEN_UPDATE_EXPLANATION")
         .map(ToOwned::to_owned)
-        .or_else(|| env::var("ZED_UPDATE_EXPLANATION").ok())
+        .or_else(|| env::var("MIZEN_UPDATE_EXPLANATION").ok())
     {
         drop(window.prompt(
             gpui::PromptLevel::Info,
-            "Zed was installed via a package manager.",
+            "Mizen was installed via a package manager.",
             Some(&message),
             &["Ok"],
             cx,
@@ -320,9 +320,9 @@ pub fn release_notes_url(cx: &mut App) -> Option<String> {
             auto_updater.client.http_client().build_url(&path)
         }
         ReleaseChannel::Nightly => {
-            "https://github.com/zed-industries/zed/commits/nightly/".to_string()
+            "https://github.com/caork/mizen/commits/nightly/".to_string()
         }
-        ReleaseChannel::Dev => "https://github.com/zed-industries/zed/commits/main/".to_string(),
+        ReleaseChannel::Dev => "https://github.com/caork/mizen/commits/main/".to_string(),
     };
     Some(url)
 }
@@ -803,9 +803,9 @@ impl AutoUpdater {
 
     async fn target_path(installer_dir: &InstallerDir) -> Result<PathBuf> {
         let filename = match OS {
-            "macos" => anyhow::Ok("Zed.dmg"),
+            "macos" => anyhow::Ok("Mizen.dmg"),
             "linux" => Ok("zed.tar.gz"),
-            "windows" => Ok("Zed.exe"),
+            "windows" => Ok("Mizen.exe"),
             unsupported_os => anyhow::bail!("not supported: {unsupported_os}"),
         }?;
 
@@ -1047,7 +1047,7 @@ async fn install_release_macos(
         .file_name()
         .with_context(|| format!("invalid running app path {running_app_path:?}"))?;
 
-    let mount_path = temp_dir.path().join("Zed");
+    let mount_path = temp_dir.path().join("Mizen");
     let mut mounted_app_path: OsString = mount_path.join(running_app_filename).into();
 
     mounted_app_path.push("/");

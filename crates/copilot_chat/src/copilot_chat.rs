@@ -865,7 +865,7 @@ pub(crate) fn copilot_request_headers(
         .header(
             "Editor-Version",
             format!(
-                "Zed/{}",
+                "Mizen/{}",
                 option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")
             ),
         )
