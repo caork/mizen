@@ -14,7 +14,7 @@ env:
 
 jobs:
   build-macos-aarch64:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -27,6 +27,7 @@ jobs:
         env:
           RELEASE_CHANNEL: stable
           MIZEN_BUNDLE: true
+          CXXFLAGS: "-stdlib=libc++"
         run: cargo build --release -p mizen
       - name: Package
         run: |
@@ -52,6 +53,7 @@ jobs:
         env:
           RELEASE_CHANNEL: stable
           MIZEN_BUNDLE: true
+          CXXFLAGS: "-stdlib=libc++"
         run: cargo build --release -p mizen
       - name: Package
         run: |
@@ -120,6 +122,8 @@ jobs:
   build-windows-x86_64:
     runs-on: windows-latest
     steps:
+      - name: Enable long paths
+        run: git config --system core.longpaths true
       - uses: actions/checkout@v4
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
