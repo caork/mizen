@@ -27,7 +27,7 @@ use walkdir::WalkDir;
 
 use std::io::IsTerminal;
 
-const URL_PREFIX: [&'static str; 5] = ["zed://", "http://", "https://", "file://", "ssh://"];
+const URL_PREFIX: [&'static str; 5] = ["mizen://", "http://", "https://", "file://", "ssh://"];
 
 struct Detect;
 
@@ -44,21 +44,21 @@ trait InstalledApp {
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "zed",
+    name = "mizen",
     disable_version_flag = true,
-    before_help = "The Zed CLI binary.
-This CLI is a separate binary that invokes Zed.
+    before_help = "The Mizen CLI binary.
+This CLI is a separate binary that invokes Mizen.
 
 Examples:
-    `zed`
-          Simply opens Zed
-    `zed --foreground`
+    `mizen`
+          Simply opens Mizen
+    `mizen --foreground`
           Runs in foreground (shows all logs)
-    `zed path-to-your-project`
-          Open your project in Zed
-    `zed -n path-to-file `
+    `mizen path-to-your-project`
+          Open your project in Mizen
+    `mizen -n path-to-file `
           Open file/folder in a new window",
-    after_help = "To read from stdin, append '-', e.g. 'ps axf | zed -'"
+    after_help = "To read from stdin, append '-', e.g. 'ps axf | mizen -'"
 )]
 struct Args {
     /// Wait for all of the given paths to be opened/closed before exiting.
@@ -537,7 +537,7 @@ fn run() -> Result<()> {
 
         let status = std::process::Command::new("sh")
             .arg(&script_path)
-            .env("ZED_CHANNEL", &*release_channel::RELEASE_CHANNEL_NAME)
+            .env("MIZEN_CHANNEL", &*release_channel::RELEASE_CHANNEL_NAME)
             .status()
             .context("Failed to execute uninstall script")?;
 
@@ -656,7 +656,7 @@ fn run() -> Result<()> {
 
     anyhow::ensure!(
         args.dev_server_token.is_none(),
-        "Dev servers were removed in v0.157.x please upgrade to SSH remoting: https://zed.dev/docs/remote-development"
+        "Dev servers were removed in v0.157.x please upgrade to SSH remoting: https://mizen.dev/docs/remote-development"
     );
 
     rayon::ThreadPoolBuilder::new()
@@ -869,10 +869,10 @@ mod linux {
                 let cli = env::current_exe()?;
                 let dir = cli.parent().context("no parent path for cli")?;
 
-                // libexec is the standard, lib/zed is for Arch (and other non-libexec distros),
-                // ./zed is for the target directory in development builds.
+                // libexec is the standard, lib/mizen is for Arch (and other non-libexec distros),
+                // ./mizen is for the target directory in development builds.
                 let possible_locations =
-                    ["../libexec/zed-editor", "../lib/zed/zed-editor", "./zed"];
+                    ["../libexec/mizen-editor", "../lib/mizen/mizen-editor", "./mizen"];
                 possible_locations
                     .iter()
                     .find_map(|p| dir.join(p).canonicalize().ok().filter(|path| path != &cli))
@@ -888,14 +888,14 @@ mod linux {
     impl InstalledApp for App {
         fn zed_version_string(&self) -> String {
             format!(
-                "Zed {}{}{} – {}",
+                "Mizen {}{}{} – {}",
                 if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
                     "".to_string()
                 } else {
                     format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
                 },
                 option_env!("RELEASE_VERSION").unwrap_or_default(),
-                match option_env!("ZED_COMMIT_SHA") {
+                match option_env!("MIZEN_COMMIT_SHA") {
                     Some(commit_sha) => format!(" {commit_sha} "),
                     None => "".to_string(),
                 },
@@ -996,8 +996,8 @@ mod flatpak {
     use std::process::Command;
     use std::{env, process};
 
-    const EXTRA_LIB_ENV_NAME: &str = "ZED_FLATPAK_LIB_PATH";
-    const NO_ESCAPE_ENV_NAME: &str = "ZED_FLATPAK_NO_ESCAPE";
+    const EXTRA_LIB_ENV_NAME: &str = "MIZEN_FLATPAK_LIB_PATH";
+    const NO_ESCAPE_ENV_NAME: &str = "MIZEN_FLATPAK_NO_ESCAPE";
 
     /// Adds bundled libraries to LD_LIBRARY_PATH if running under flatpak
     pub fn ld_extra_libs() {
@@ -1019,7 +1019,7 @@ mod flatpak {
         if let Some(flatpak_dir) = get_flatpak_dir() {
             let mut args = vec!["/usr/bin/flatpak-spawn".into(), "--host".into()];
             args.append(&mut get_xdg_env_args());
-            args.push("--env=ZED_UPDATE_EXPLANATION=Please use flatpak to update zed".into());
+            args.push("--env=MIZEN_UPDATE_EXPLANATION=Please use flatpak to update mizen".into());
             args.push(
                 format!(
                     "--env={EXTRA_LIB_ENV_NAME}={}",
@@ -1027,7 +1027,7 @@ mod flatpak {
                 )
                 .into(),
             );
-            args.push(flatpak_dir.join("bin").join("zed").into());
+            args.push(flatpak_dir.join("bin").join("mizen").into());
 
             let mut is_app_location_set = false;
             for arg in &env::args_os().collect::<Vec<_>>()[1..] {
@@ -1037,7 +1037,7 @@ mod flatpak {
 
             if !is_app_location_set {
                 args.push("--zed".into());
-                args.push(flatpak_dir.join("libexec").join("zed-editor").into());
+                args.push(flatpak_dir.join("libexec").join("mizen-editor").into());
             }
 
             let error = exec::execvp("/usr/bin/flatpak-spawn", args);
@@ -1048,11 +1048,11 @@ mod flatpak {
 
     pub fn set_bin_if_no_escape(mut args: super::Args) -> super::Args {
         if env::var(NO_ESCAPE_ENV_NAME).is_ok()
-            && env::var("FLATPAK_ID").is_ok_and(|id| id.starts_with("dev.zed.Zed"))
+            && env::var("FLATPAK_ID").is_ok_and(|id| id.starts_with("dev.mizen.Mizen"))
             && args.zed.is_none()
         {
-            args.zed = Some("/app/libexec/zed-editor".into());
-            unsafe { env::set_var("ZED_UPDATE_EXPLANATION", "Please use flatpak to update zed") };
+            args.zed = Some("/app/libexec/mizen-editor".into());
+            unsafe { env::set_var("MIZEN_UPDATE_EXPLANATION", "Please use flatpak to update mizen") };
         }
         args
     }
@@ -1063,7 +1063,7 @@ mod flatpak {
         }
 
         if let Ok(flatpak_id) = env::var("FLATPAK_ID") {
-            if !flatpak_id.starts_with("dev.zed.Zed") {
+            if !flatpak_id.starts_with("dev.mizen.Mizen") {
                 return None;
             }
 
@@ -1135,14 +1135,14 @@ mod windows {
     impl InstalledApp for App {
         fn zed_version_string(&self) -> String {
             format!(
-                "Zed {}{}{} – {}",
+                "Mizen {}{}{} – {}",
                 if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
                     "".to_string()
                 } else {
                     format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
                 },
                 option_env!("RELEASE_VERSION").unwrap_or_default(),
-                match option_env!("ZED_COMMIT_SHA") {
+                match option_env!("MIZEN_COMMIT_SHA") {
                     Some(commit_sha) => format!(" {commit_sha} "),
                     None => "".to_string(),
                 },
@@ -1207,9 +1207,9 @@ mod windows {
                 let cli = std::env::current_exe()?;
                 let dir = cli.parent().context("no parent path for cli")?;
 
-                // ../Zed.exe is the standard, lib/zed is for MSYS2, ./zed.exe is for the target
+                // ../Mizen.exe is the standard, lib/mizen is for MSYS2, ./mizen.exe is for the target
                 // directory in development builds.
-                let possible_locations = ["../Zed.exe", "../lib/zed/zed-editor.exe", "./zed.exe"];
+                let possible_locations = ["../Mizen.exe", "../lib/mizen/mizen-editor.exe", "./mizen.exe"];
                 possible_locations
                     .iter()
                     .find_map(|p| dir.join(p).canonicalize().ok().filter(|path| path != &cli))
@@ -1308,7 +1308,7 @@ mod mac_os {
 
     impl InstalledApp for Bundle {
         fn zed_version_string(&self) -> String {
-            format!("Zed {} – {}", self.version(), self.path().display(),)
+            format!("Mizen {} – {}", self.version(), self.path().display(),)
         }
 
         fn launch(&self, url: String, user_data_dir: Option<&str>) -> anyhow::Result<()> {

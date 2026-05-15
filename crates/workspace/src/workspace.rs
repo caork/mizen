@@ -169,14 +169,14 @@ use crate::{
 pub const SERIALIZATION_THROTTLE_TIME: Duration = Duration::from_millis(200);
 
 static ZED_WINDOW_SIZE: LazyLock<Option<Size<Pixels>>> = LazyLock::new(|| {
-    env::var("ZED_WINDOW_SIZE")
+    env::var("MIZEN_WINDOW_SIZE")
         .ok()
         .as_deref()
         .and_then(parse_pixel_size_env_var)
 });
 
 static ZED_WINDOW_POSITION: LazyLock<Option<Point<Pixels>>> = LazyLock::new(|| {
-    env::var("ZED_WINDOW_POSITION")
+    env::var("MIZEN_WINDOW_POSITION")
         .ok()
         .as_deref()
         .and_then(parse_pixel_position_env_var)
@@ -9167,7 +9167,7 @@ actions!(
         ///
         /// If you want to open a specific channel, use `zed::OpenZedUrl` with a channel notes URL -
         /// can be copied via "Copy link to section" in the context menu of the channel notes
-        /// buffer. These URLs look like `https://zed.dev/channel/channel-name-CHANNEL_ID/notes`.
+        /// buffer. These URLs look like `https://mizen.dev/channel/channel-name-CHANNEL_ID/notes`.
         OpenChannelNotes,
         /// Mutes your microphone.
         Mute,

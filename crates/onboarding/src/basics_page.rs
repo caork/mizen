@@ -431,12 +431,12 @@ fn render_worktree_auto_trust_switch(tab_index: &mut isize, cx: &mut App) -> imp
         ui::ToggleState::Unselected
     };
 
-    let tooltip_description = "Zed can only allow services like language servers, project settings, and MCP servers to run after you mark a new project as trusted.";
+    let tooltip_description = "Mizen can only allow services like language servers, project settings, and MCP servers to run after you mark a new project as trusted.";
 
     SwitchField::new(
         "onboarding-auto-trust-worktrees",
         Some("Trust All Projects By Default"),
-        Some("Automatically mark all new projects as trusted to unlock all Zed's features".into()),
+        Some("Automatically mark all new projects as trusted to unlock all Mizen's features".into()),
         toggle_state,
         {
             let fs = <dyn Fs>::global(cx);
@@ -636,7 +636,7 @@ fn render_zed_agent_button(user_store: &Entity<UserStore>, cx: &mut App) -> impl
                 .size(IconSize::XSmall)
                 .color(Color::Muted),
         )
-        .name("Zed Agent")
+        .name("Mizen Agent")
         .state(state_element)
         .disabled(is_trial || is_pro)
         .map(|this| {
