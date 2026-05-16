@@ -93,21 +93,25 @@ jobs:
           path: artifacts/mizen-linux-x86_64.tar.gz
 
   build-linux-aarch64:
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-24.04-arm
     env:
-      CC: clang
-      CXX: clang++
+      CC: clang-18
+      CXX: clang++-18
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Install system dependencies
-        run: ./script/linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 lld-18
+          ./script/linux
       - name: Download WASI SDK
         run: ./script/download-wasi-sdk
       - name: Build
         env:
           RELEASE_CHANNEL: stable
+          RUSTFLAGS: "-C link-arg=-fuse-ld=lld-18"
         run: cargo build --release -p mizen
       - name: Package
         run: |
