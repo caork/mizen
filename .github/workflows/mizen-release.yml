@@ -40,7 +40,7 @@ jobs:
           path: artifacts/mizen-macos-aarch64.tar.gz
 
   build-macos-x86_64:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -54,11 +54,11 @@ jobs:
           RELEASE_CHANNEL: stable
           MIZEN_BUNDLE: true
           CXXFLAGS: "-stdlib=libc++"
-        run: cargo build --release -p mizen
+        run: cargo build --release --target x86_64-apple-darwin -p mizen
       - name: Package
         run: |
           mkdir -p artifacts
-          cp target/release/mizen artifacts/mizen-macos-x86_64
+          cp target/x86_64-apple-darwin/release/mizen artifacts/mizen-macos-x86_64
           cd artifacts && tar czf mizen-macos-x86_64.tar.gz mizen-macos-x86_64
       - uses: actions/upload-artifact@v4
         with:
