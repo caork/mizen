@@ -47,6 +47,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-apple-darwin
+      - name: Ensure x86_64 target
+        run: rustup target add x86_64-apple-darwin
       - name: Install dependencies
         run: brew install cmake
       - name: Build
@@ -54,6 +56,7 @@ jobs:
           RELEASE_CHANNEL: stable
           MIZEN_BUNDLE: true
           CXXFLAGS: "-stdlib=libc++"
+          CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER: clang
         run: cargo build --release --target x86_64-apple-darwin -p mizen
       - name: Package
         run: |
