@@ -105,13 +105,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-18 lld-18
+          sudo ln -sf /usr/bin/lld-18 /usr/local/bin/ld.lld
           ./script/linux
       - name: Download WASI SDK
         run: ./script/download-wasi-sdk
       - name: Build
         env:
           RELEASE_CHANNEL: stable
-          RUSTFLAGS: "-C link-arg=-fuse-ld=lld-18"
+          RUSTFLAGS: "-C link-arg=-fuse-ld=lld"
         run: cargo build --release -p mizen
       - name: Package
         run: |
